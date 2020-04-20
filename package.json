@@ -22,11 +22,15 @@
   "dependencies": {
     "@umijs/preset-react": "1.x",
     "@umijs/test": "^3.1.1",
+    "antd": "^4.1.4",
     "lint-staged": "^10.0.7",
     "prettier": "^1.19.1",
     "react": "^16.12.0",
     "react-dom": "^16.12.0",
     "umi": "^3.1.1",
     "yorkie": "^2.0.0"
+  },
+  "devDependencies": {
+    "umi-types": "^0.5.14"
   }
 }
