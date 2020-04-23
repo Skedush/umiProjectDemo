@@ -1,45 +1,71 @@
-import React, { FC } from 'react';
+import React, { PureComponent } from 'react';
 import { IndexModelState, ConnectProps, Loading, connect } from 'umi';
-/*
-  connect就是react-redux中的connect，umi直接import，export出来的
-  IndexModelState是在model中export的数据类型，在下方数据绑定到组件才能取到
-  ConnectProps是页面传入的类型包含dispatch，match，location，history，route熟悉react的人都知道不解释了
-  Loading是dva封装的model异步方法调用状态，执行中为true，否则为false，为界面加载中的状态使用
-*/
+import { Button } from 'antd';
 
-//定义当前页面的props，继承ConnectProps，再添加两个属性，model中的数据以及loading状态
 interface PageProps extends ConnectProps {
   index: IndexModelState;
   loading: boolean;
 }
+//定义当前页面state数据的类型
+interface IndexPageState {
+  name: string;
+}
 
-/*
-  页面组件，FC是在react中定义的type FC<P = {}> = FunctionComponent<P>，表示IndexPage是一个方法组件。
-  FunctionComponent又是什么？
+class IndexPage extends PureComponent<PageProps, IndexPageState> {
+  /**
+   * 当前页面继承了PureComponent类，后面是泛型，第一个是组件传入参数的类型，第二个是当前页面数据的类型
+   */
 
-  interface FunctionComponent<P = {}> {
-        (props: PropsWithChildren<P>, context?: any): ReactElement<any, any> | null;
-        propTypes?: WeakValidationMap<P>;
-        contextTypes?: ValidationMap<any>;
-        defaultProps?: Partial<P>;
-        displayName?: string;
-    }
-    文件跟踪下去太多了，就到这吧
-  泛型为PageProps表示页面传入的参数类型
-  return 页面展示的内容
-*/
-const IndexPage: FC<PageProps> = ({ index, dispatch }) => {
-  const { name } = index;
-  return <div>Hello {name}</div>;
-};
+  //class的构造方法，参数props数据类型是PageProps
+  constructor(props: Readonly<PageProps>) {
+    super(props);
+    //state中的数据类型必须是IndexPageState
+    this.state = {
+      name: 'skedush in this state',
+    };
+  }
 
-/*
-  使用redux中的connect将model数据绑定到组件
-  connect传入一个箭头函数，获得model的数据，采用解构的方式{index,loading}:{index: IndexModelState; loading: Loading}(冒号后面ts数据类型）
-  然后return了index和loading.models.index
-  loading是dva全部model的loading状态，其中.index是逻辑上当前页面绑定的model的loading，model.ts中命名空间是index
-  最后export default IndexPage也就是这个组件
-*/
+  //render函数渲染当前页面组件
+  render() {
+    //index会在this.props中，也就是当前组件传入的参数，其中还有dispatch函数等，可自行输出查看
+    const { index } = this.props;
+    //从命名空间为index的model中获取state：name
+    const { name } = index;
+    //return也就是render的渲染对象
+
+    const thisStateName = this.state.name;
+    return (
+      <div>
+        Hello {name} and {thisStateName}
+        <div>
+          <Button type={'primary'} onClick={this.onClick}>
+            点我改变当前页面state中的name
+          </Button>
+        </div>
+        <br />
+        <div>
+          <Button type={'primary'} onClick={this.onClick2}>
+            点我改变model中state的name
+          </Button>
+        </div>
+      </div>
+    );
+  }
+
+  onClick = () => {
+    const { name } = this.state;
+    this.setState({
+      name: name + '1',
+    });
+  };
+
+  onClick2 = () => {
+    const { dispatch, index } = this.props;
+    const { name } = index;
+    dispatch?.({ type: 'index/changeState', payload: { name: name + '1' } });
+  };
+}
+
 export default connect(
   ({ index, loading }: { index: IndexModelState; loading: Loading }) => ({
     index,
