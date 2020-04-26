@@ -1,6 +1,7 @@
 import React, { PureComponent } from 'react';
 import { IndexModelState, ConnectProps, Loading, connect } from 'umi';
 import { Button } from 'antd';
+import styles from './index.less';
 
 interface PageProps extends ConnectProps {
   index: IndexModelState;
@@ -10,7 +11,12 @@ interface PageProps extends ConnectProps {
 interface IndexPageState {
   name: string;
 }
-
+@connect(
+  ({ index, loading }: { index: IndexModelState; loading: Loading }) => ({
+    index,
+    loading: loading.models.index,
+  }),
+)
 class IndexPage extends PureComponent<PageProps, IndexPageState> {
   /**
    * 当前页面继承了PureComponent类，后面是泛型，第一个是组件传入参数的类型，第二个是当前页面数据的类型
@@ -37,13 +43,13 @@ class IndexPage extends PureComponent<PageProps, IndexPageState> {
     return (
       <div>
         Hello {name} and {thisStateName}
-        <div>
+        <div className={styles.btnDiv}>
           <Button type={'primary'} onClick={this.onClick}>
             点我改变当前页面state中的name
           </Button>
         </div>
         <br />
-        <div>
+        <div className={'antdBtn'}>
           <Button type={'primary'} onClick={this.onClick2}>
             点我改变model中state的name
           </Button>
@@ -66,9 +72,4 @@ class IndexPage extends PureComponent<PageProps, IndexPageState> {
   };
 }
 
-export default connect(
-  ({ index, loading }: { index: IndexModelState; loading: Loading }) => ({
-    index,
-    loading: loading.models.index,
-  }),
-)(IndexPage);
+export default IndexPage;

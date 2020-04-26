@@ -1,4 +1,5 @@
 import { Effect, ImmerReducer, Reducer, Subscription } from 'umi';
+import request from '@/utils/request';
 
 //定义的State数据类型
 export interface IndexModelState {
@@ -32,6 +33,16 @@ const IndexModel: IndexModelType = {
   effects: {
     *query({ payload }, { call, put }) {},
     *changeState({ payload }, { call, put }) {
+      const res = yield call((data: object) => {
+        console.log('data: ', data);
+        const method: 'GET' = 'GET';
+        return request({
+          url: '/api/users',
+          data,
+          method,
+        });
+      }, payload);
+      console.log('res: ', res);
       yield put({ type: 'save', payload: { name: payload.name } });
     },
   },

@@ -680,9 +680,221 @@ export default IndexModel;
 |此时页面展示是这样，点击按钮会产生相应的变化|
 |----------------------|
 |             ![在这里插入图片描述](https://images.gitbook.cn/7fcb6d80-8569-11ea-a9ff-29e53f17413b)         | 
+## 修改antd组件的样式
+### 使用cssModule方式修改
+1.在index.tsx中引入index.less,首先保证index.tsx同级目录中有index.less这个文件，没有自行创建；Ï
+```js
+import styles from './index.less';
+```
+2.在给button增加className属性,cssmodule方式使用如下
+```js
+<Button
+	className={styles.btn}
+	type={'primary'}
+ 	onClick={this.onClick}
+>
+  点我改变当前页面state中的name
+</Button>
+```
+3.在index.less中增加样式
+```css
+.btn {
+  background: blue;
+  &:hover {
+    background: yellow;
+    color: #000;
+  }
+}
 
+```
+
+![在这里插入图片描述](https://images.gitbook.cn/355b8ba0-86c6-11ea-94dc-e928d61ce86c)
+
+	鼠标悬浮：
+![在这里插入图片描述](https://images.gitbook.cn/402bf290-86c6-11ea-bdf2-1776e599fc0a)
+
+注意是是要是引用了**antd pro**，这么修改button的样式无效，因为**antd pro**的样式有毒的。
+
+得这么改,不过大多antd的组件样式基本都得这么改:
+
+index.tsx:
+```js
+//将样式绑定到组件外的className中
+ <div className={styles.btnDiv}>
+          <Button
+            type={'primary'}
+            onClick={this.onClick}
+          >
+            点我改变当前页面state中的name
+          </Button>
+        </div>
+```
+
+index.less
+```js
+.btnDiv {
+	 //global是覆盖到btnDiv下的全局样式，当然还要考虑less的机制，不说了自己去google查，
+  //要是外边没有btnDiv直接用global，会覆盖了整个项目antd的button样式，所有的按钮都变成这样了，不建议使用，造成样式污染
+  :global {
+    //这里的样式名称是通过浏览器自带的开发者工具下元素捕捉到的
+    .ant-btn-primary {
+      background: blue;
+      &:hover {
+        background: yellow;
+        color: #000;
+      }
+    }
+  }
+}
+```
+
+现在再看页面效果是一样的
+
+### 捕捉antd组件样式名
+	防止一些同学这个都不知道，我还是说一下吧，Chrome浏览器为例子，不用Chrome的前端就别学了，按f12
+	mac和windows都一样。或者之间ctrl+shift+c (command+shift+c)
+	ubuntu的话就不说了，我不配讲ubuntu大佬。
+![在这里插入图片描述](https://images.gitbook.cn/5d03e920-86c8-11ea-94dc-e928d61ce86c)
+
+### 使用global.less
+我们之前创建了global.less这个文件，这个是全局的样式，umi会默认将该文件的样式覆盖到全局，利用global.less修改第二个按钮的样式，woc这里改了半天，因为umi升级到3.0之后global.less有点区别了
+编辑global.less:
+```js
+.antdBtn {
+  //umi3.0在这里面用:global反而无效了，不使用才有效
+  // :global {
+  .ant-btn-primary {
+    background: red;
+    &:hover {
+      background: green;
+      color: #000;
+    }
+  }
+  // }
+}
+//原来umi2.0按照下面用就覆盖了全局的样式，但是在umi3.0好像不行了
+// :global {
+//   .ant-btn-primary {
+//     background: blue;
+//     &:hover {
+//       background: yellow;
+//       color: #000;
+//     }
+//   }
+// }
+```
+
+编辑index.tsx的第二个button：
+```js
+ <div className={'antdBtn'}>
+          <Button type={'primary'} onClick={this.onClick2}>
+            点我改变model中state的name
+          </Button>
+        </div>
+```
+
+查看页面
+![在这里插入图片描述](https://images.gitbook.cn/c13ca980-86f1-11ea-b2f7-bbf1d88e57dd)
 
 ## 使用axios发起网络请求
+### 编写mock
+在mock中创建文件
+mockDemo.ts:
+```js
+import { Request, Response } from 'express';
+
+export default {
+  // 支持值为 Object 和 Array
+  'GET /api/users': { users: [1, 2] },
+
+  // GET 可忽略
+  '/api/users/1': { id: 1 },
+
+  // 支持自定义函数，API 参考 express@4
+  'POST /api/users/create': (req: Request, res: Response) => {
+    // 添加跨域请求头
+    res.setHeader('Access-Control-Allow-Origin', '*');
+    res.end('ok');
+  },
+};
+
+```
+保存完之后mock会自动加载，在终端会出现，失败会有失败提醒
+![在这里插入图片描述](https://images.gitbook.cn/cd65c1a0-86fc-11ea-a330-69dc969564d3)
+### 封装request
+	简单封装request,在utils文件夹中创建request.ts，这里要用到axios和lodash的库，先yarn add一下
+	$yarn add axios lodash
+
+request.ts:
+```js
+import axios, { AxiosError, AxiosRequestConfig } from 'axios';
+import { cloneDeep, isEmpty } from 'lodash';
+import qs from 'qs';
+
+//定义返回的类型
+export interface ResponseData {
+  success: boolean;
+  message?: string;
+  data?: any;
+}
+
+//定义axios参数，继承AxiosRequestConfig
+export interface RequestConfig extends AxiosRequestConfig {}
+
+/**
+ * axios的请求封装，地址判断、错误处理
+ *
+ * @export
+ * @param {object} options 请求选项
+ * @returns {Promise} 请求结果
+ */
+export default function request(
+  options: RequestConfig,
+): Promise<ResponseData | undefined> {
+  const { data, url, method = 'get' } = options;
+  if (!url) {
+    throw new Error('request url none');
+  }
+
+  //深拷贝data数据，以免造成引用产生的问题
+  const cloneData = cloneDeep(data);
+
+  //get请求在url中添加请求参数
+  options.url =
+    method.toLocaleLowerCase() === 'get'
+      ? `${url}${isEmpty(cloneData) ? '' : '?'}${qs.stringify(cloneData)}`
+      : url;
+
+  // session
+  options.withCredentials = true;
+  // 设置请求头
+  options.headers = {
+    'X-Request-Type': 'ajax',
+    'Content-Type': 'application/json;charset=UTF-8',
+  };
+
+  //发起请求
+  return axios(options)
+    .then(response => {
+      const { data } = response;
+
+      return Promise.resolve({
+        //请求成功的返回
+        success: true,
+        message: '请求成功',
+        data: data || {},
+      });
+    })
+    .catch((error: AxiosError) => {
+      //请求错误的返回
+      return {
+        success: false,
+        message: error.toString(),
+      };
+    });
+}
+
+```
 
 
 # 八、架构属于自己前端

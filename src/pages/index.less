@@ -1,6 +1,21 @@
-.normal {
-}
-
-.title {
-  background: rgb(121, 242, 157);
+// .btn {
+// background: blue;
+// &:hover {
+//   background: yellow;
+//   color: #000;
+// }
+// }
+.btnDiv {
+  //global是覆盖到btnDiv下的全局样式，当然还要考虑less的机制，不说了自己去google查，
+  //要是外边没有btnDiv直接用global，会覆盖了整个项目antd的button样式，所有的按钮都变成这样了，不建议使用，造成样式污染
+  :global {
+    //这里的样式名称是通过浏览器自带的开发者工具下元素捕捉到的
+    .ant-btn-primary {
+      background: blue;
+      &:hover {
+        background: yellow;
+        color: #000;
+      }
+    }
+  }
 }

@@ -1,14 +1,22 @@
-.flexAround {
-  display: flex;
-  justify-content: space-around;
+.antdBtn {
+  //在这里面用:global反而无效了，不使用才有效
+  // :global {
+  .ant-btn-primary {
+    background: red;
+    &:hover {
+      background: green;
+      color: #000;
+    }
+  }
+  // }
 }
-.itemCenter {
-  align-items: center;
-}
-
-.flexWrap {
-  flex-wrap: wrap;
-}
-.flexNoWrap {
-  flex-wrap: nowrap;
-}
+//原来按照下面用就覆盖了全局的样式，但是在umi3.0好像不行了
+// :global {
+//   .ant-btn-primary {
+//     background: blue;
+//     &:hover {
+//       background: yellow;
+//       color: #000;
+//     }
+//   }
+// }
