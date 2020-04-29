@@ -2,7 +2,7 @@ import { Request, Response } from 'express';
 
 export default {
   // 支持值为 Object 和 Array
-  'GET /api/users': { users: [1, 2] },
+  'GET /api/users': { name: 'Skedush' },
 
   // GET 可忽略
   '/api/users/1': { id: 1 },

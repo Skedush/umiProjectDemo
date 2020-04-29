@@ -1,5 +1,6 @@
 import { Effect, ImmerReducer, Reducer, Subscription } from 'umi';
 import request from '@/utils/request';
+//@代表src目录
 
 //定义的State数据类型
 export interface IndexModelState {
@@ -32,18 +33,26 @@ const IndexModel: IndexModelType = {
   //model副作用也是异步方法，相同的输入可能得到不同的输出，一般用它做网络请求
   effects: {
     *query({ payload }, { call, put }) {},
+
     *changeState({ payload }, { call, put }) {
-      const res = yield call((data: object) => {
-        console.log('data: ', data);
-        const method: 'GET' = 'GET';
+      /**
+       * call用来调用异步函数，将异步函数和函数参数作为call函数的参数传入，返回一个js对象。saga引入他的主要作用是方便测试，同时也能让我们的代码更加规范化。
+同js原生的call一样，call函数也可以指定this对象，只要把this对象当第一个参数传入call方法就好了
+
+put是saga对Redux中dispatch方法的一个封装，调用put方法后，saga内部会分发action通知Store更新state。
+       */
+
+      //yield 等待异步请求结束 ，res请求的返回值，注意这里如果没有yield的话res是一个promise对象
+      const res = yield call(() => {
         return request({
           url: '/api/users',
-          data,
-          method,
+          data: payload,
+          method: 'GET',
         });
-      }, payload);
+      });
       console.log('res: ', res);
-      yield put({ type: 'save', payload: { name: payload.name } });
+      //在调用reducers中的save方法，将res存到当前model的state中
+      yield put({ type: 'save', payload: { name: res.data.name } });
     },
   },
   /*

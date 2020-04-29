@@ -66,8 +66,11 @@ class IndexPage extends PureComponent<PageProps, IndexPageState> {
   };
 
   onClick2 = () => {
+    //页面用connect绑定了model会传入dispatch
     const { dispatch, index } = this.props;
+    //model中state中的name
     const { name } = index;
+    //调用model的changeState，并传入参数，注意model的作用域，可以去umi约定式路由看，不做解释
     dispatch?.({ type: 'index/changeState', payload: { name: name + '1' } });
   };
 }
