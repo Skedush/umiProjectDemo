@@ -269,7 +269,7 @@ export interface IConfig extends IConfigCore {
 }
 ```
 
-这些属性自己去根据umi官网上的配置项说明，根据自己需求自由添加，地址是https://umijs.org/zh-CN/config，不多说了。
+> 这些属性自己去根据umi官网上的配置项说明，根据自己需求自由添加，地址是https://umijs.org/zh-CN/config，不多说了。
 
 # 七、开始编写页面
 ## router提取
@@ -283,7 +283,7 @@ const routes: IRoute[] = [{ path: '/', component: '@/pages/index' }];
 export default routes;
 
 ```
-没有umi-types依赖包，yarn在开发环境中，生产环境不需要的
+发现没有umi-types依赖包，yarn在开发环境中，生产环境不需要的
 
 	$yarn add umi-types --dev 
 	
@@ -361,7 +361,8 @@ export default connect(
 
 ```
 
-现在代码是报错的，别着急，再在index.ts同级目录下创建model.ts数据流控制文件，将代码复制进去，我这种CV工程师常干的事情，model自己去看[**dva官网**](https://ant.design/index-cn)的教程,写的很清楚了，通常一个页面一个model
+> 现在代码是报错的，别着急，再在index.ts同级目录下创建model.ts数据流控制文件，将代码复制进去，我这种CV工程师常干的事情，model自己去看[**dva官网**](https://ant.design/index-cn)的教程,写的很清楚了，通常一个页面一个model
+
 ```js
 import { Effect, ImmerReducer, Reducer, Subscription } from 'umi';
 
@@ -457,7 +458,8 @@ export default IndexModel;
 
 ```
 
-以上代码都是umi官网的demo中复制来的不是本人写的
+> 以上代码都是umi官网的demo中复制来的不是本人写的
+
 再看看页面，左上角是不是出现了hello skedush in model的字样，其中skedush in model是在model的state中的name传入当前组件展示的
 ![在这里插入图片描述](https://images.gitbook.cn/e0ff4140-84a0-11ea-b751-6ff511beda88)
 ## 修改组件使用class形式
@@ -527,7 +529,8 @@ export default connect(
 	在终端执行命令安装antd
 	$ yarn add antd
 修改index.tsx,以及在model中添加Effect
-index.tsx:在头部引用antd中的button组件，在render将组件渲染，并绑定onclick事件，事件使用箭头函数，默认bind了当前的组件。
+index.tsx:
+在头部引用antd中的button组件，在render将组件渲染，并绑定onclick事件，事件使用箭头函数，默认bind了当前的组件。
 ```js
 import React, { PureComponent } from 'react';
 import { IndexModelState, ConnectProps, Loading, connect } from 'umi';
@@ -713,7 +716,7 @@ import styles from './index.less';
 	鼠标悬浮：
 ![在这里插入图片描述](https://images.gitbook.cn/402bf290-86c6-11ea-bdf2-1776e599fc0a)
 
-注意是是要是引用了**antd pro**，这么修改button的样式无效，因为**antd pro**的样式有毒的。
+> 注意是是要是引用了**antd pro**，这么修改button的样式无效，因为**antd pro**的样式有毒的。
 
 得这么改,不过大多antd的组件样式基本都得这么改:
 
@@ -751,13 +754,17 @@ index.less
 现在再看页面效果是一样的
 
 ### 捕捉antd组件样式名
-	防止一些同学这个都不知道，我还是说一下吧，Chrome浏览器为例子，不用Chrome的前端就别学了，按f12
-	mac和windows都一样。或者之间ctrl+shift+c (command+shift+c)
-	ubuntu的话就不说了，我不配讲ubuntu大佬。
+
+> 	防止一些同学这个都不知道，我还是说一下吧，Chrome浏览器为例子，不用Chrome的前端就别学了，按f12
+> 	mac和windows都一样。或者之间ctrl+shift+c (command+shift+c)
+> 	ubuntu的话就不说了，我不配讲ubuntu大佬。
+
 ![在这里插入图片描述](https://images.gitbook.cn/5d03e920-86c8-11ea-94dc-e928d61ce86c)
 
 ### 使用global.less
-我们之前创建了global.less这个文件，这个是全局的样式，umi会默认将该文件的样式覆盖到全局，利用global.less修改第二个按钮的样式，woc这里改了半天，因为umi升级到3.0之后global.less有点区别了
+
+> 我们之前创建了global.less这个文件，这个是全局的样式，umi会默认将该文件的样式覆盖到全局，利用global.less修改第二个按钮的样式，woc这里改了半天，因为umi升级到3.0之后global.less有点区别了
+
 编辑global.less:
 ```js
 .antdBtn {
@@ -805,7 +812,7 @@ import { Request, Response } from 'express';
 
 export default {
   // 支持值为 Object 和 Array
-  'GET /api/users': { users: [1, 2] },
+  'GET /api/users': { name: 'Skedush' },
 
   // GET 可忽略
   '/api/users/1': { id: 1 },
@@ -896,5 +903,188 @@ export default function request(
 
 ```
 
+### 在model中使用网络请求
+打开model.ts
+引入编写的request.js
+再修改model中的changeState方法
+```js
+import request from '@/utils/request';
+//@代表src目录
+*changeState({ payload }, { call, put }) {
+      /**
+       * call用来调用异步函数，将异步函数和函数参数作为call函数的参数传入，返回一个js对象。saga引入他的主要作用是方便测试，同时也能让我们的代码更加规范化。
+同js原生的call一样，call函数也可以指定this对象，只要把this对象当第一个参数传入call方法就好了
 
-# 八、架构属于自己前端
+put是saga对Redux中dispatch方法的一个封装，调用put方法后，saga内部会分发action通知Store更新state。
+       */
+
+       //yield 等待异步请求结束 ，res请求的返回值，注意这里如果没有yield的话res是一个promise对象
+      const res = yield call(() => {
+        return request({
+          url: '/api/users',
+          data: payload,
+          method: 'GET',
+        });
+      });
+      //在调用reducers中的save方法，将res存到当前model的state中
+      yield put({ type: 'save', payload: { name: res.data.name } });
+    },
+```
+	将以上代码添加替换掉model.ts中对应的地方
+
+修改index.tsx的按钮onclick的事件，发起请求，以及将model中的state再次渲染到页面中
+index.tsx
+
+> 修改onClick2这个方法：
+
+```js
+onClick2 = () => {
+    //页面用connect绑定了model会传入dispatch
+    const { dispatch, index } = this.props;
+    //model中state中的name
+    const { name } = index;
+    //调用model的changeState，并传入参数，注意model的作用域，可以去umi约定式路由看，不做解释
+    dispatch?.({ type: 'index/changeState', payload: { name: name + '1' } });
+  };
+```
+
+页面效果：
+![在这里插入图片描述](https://images.gitbook.cn/9390da90-8a1d-11ea-8f6f-6d0db3ef66d9)
+前面的skedush  in model是在model的state中取得的，请求改变了model的数据，传入的props改变页面自动会渲染
+
+点击按钮发起的请求
+![在这里插入图片描述](https://images.gitbook.cn/e6171ae0-8a1d-11ea-8f6f-6d0db3ef66d9)
+网络请求的response
+![在这里插入图片描述](https://images.gitbook.cn/0f4259c0-8a1e-11ea-9103-af8d2f5e3fcf)
+model中res的输出，因为我们在request中封装了请求的返回值
+![在这里插入图片描述](https://images.gitbook.cn/13f046e0-8a1d-11ea-9a9b-f54aaecc4d20)
+开发到这里，单个页面基本的流程已经完成了，写下来快速开发第二个页面。
+
+# 八、快速开发第二个页面
+
+ 1. 在pages下创建Dashboard文件夹，接着再Dashboard中创建Home与NewPage文件夹
+ 2. 将原本在pages下的index.tsx,index.less,model.ts移动到Home文件夹下，在NewPage中创建index.tsx,index.less,model.ts三个文件创建完后你的目录是这样的：
+ 
+ ![在这里插入图片描述](https://images.gitbook.cn/259825e0-8d36-11ea-a326-c7ef51ab79ae)
+
+ 3. 修改config中router.config.ts路由配置文件
+
+ 
+```js
+import { IRoute } from 'umi-types';
+const routes: IRoute[] = [
+  { path: '/', component: '@/pages/Dashboard/Home' },
+  { path: '/new', component: '@/pages/Dashboard/NewPage' },
+];
+export default routes;
+```
+
+ 4. 现在进入http://localhost:8000/new路由下是空白的，因为我们没有写任何东西，打开NewPage下的index.tsx添加如下代码:
+```js
+import React, { PureComponent } from 'react';
+import { NewPageModelState, ConnectProps, Loading, connect } from 'umi';
+
+import { Button } from 'antd';
+
+interface NewPageProps extends ConnectProps, NewPageModelState {}
+interface NewPageState {}
+class NewPage extends PureComponent<NewPageProps, NewPageState> {
+  constructor(props: Readonly<NewPageProps>) {
+    super(props);
+    this.state = {};
+  }
+
+  render() {
+    return (
+      <div>
+        <div>I am NewPage,model count is {this.props.count}</div>
+        <div>
+          <Button type={'primary'} onClick={this.clickBtn}>
+            NewPage
+          </Button>
+        </div>
+      </div>
+    );
+  }
+  clickBtn = () => {
+    const { dispatch, count } = this.props;
+    dispatch?.({ type: 'newPage/changeCount', payload: { count } });
+  };
+}
+
+export default connect(
+  ({ newPage, loading }: { newPage: NewPageModelState; loading: Loading }) => ({
+    count: newPage.count,
+    loading: loading.models.newPage,
+  }),
+)(NewPage);
+```
+ 5. 在mock文件夹下创建newPage.ts模拟数据请求数据：
+```js
+import { Request, Response } from 'express';
+
+export default {
+  ['POST /api/count/post'](req: Request, res: Response) {
+    const count = req.body.count;
+    res.json({ count: count + 1 });
+  },
+};
+```
+ 6. NewPage下的model.ts：
+```js
+import { Effect, ImmerReducer, Reducer, Subscription } from 'umi';
+import request from '@/utils/request';
+export interface NewPageModelState {
+  count: number;
+}
+
+export interface NewPageModelType {
+  namespace: 'newPage';
+  state: NewPageModelState;
+  effects: {
+    changeCount: Effect;
+  };
+  reducers: {
+    save: Reducer<NewPageModelState>;
+  };
+  subscriptions: {};
+}
+
+const NewPageModel: NewPageModelType = {
+  namespace: 'newPage',
+  state: {
+    count: 0,
+  },
+  effects: {
+    *changeCount({ payload }, { call, put }) {
+      const res = yield call(() => {
+        return request({
+          url: '/api/count/post',
+          data: payload,
+          method: 'POST',
+        });
+      });
+      yield put({ type: 'save', payload: { count: res.data.count } });
+    },
+  },
+
+  reducers: {
+    save(state, { payload }) {
+      return {
+        ...state,
+        ...payload,
+      };
+    },
+  },
+  subscriptions: {},
+};
+export default NewPageModel;
+```
+
+ 7. 现在让我们看看页面的效果
+
+![在这里插入图片描述](https://images.gitbook.cn/81998410-8d3b-11ea-bf74-150f7ff6235d)
+![在这里插入图片描述](https://images.gitbook.cn/da412230-8d3b-11ea-861a-9398d62a6944)
+
+![在这里插入图片描述](https://images.gitbook.cn/e6479820-8d3b-11ea-bdd1-7d5e6a2f3cf3)
+本场chat结束，这个只是一个简单使用umi框架的教程，真正应用到开发中还需要封装很多通用的工具类、api、装饰器等，还有最关键通用组件的封装。下一篇我将介绍如何封装一些通用的库，与通用组件的封装，以及页面级组件的封装，令开发变的更加简单，打造一款属于自己的企业级框架。
