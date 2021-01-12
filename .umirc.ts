@@ -1,8 +1,7 @@
+import { resolve } from 'path';
 import { defineConfig } from 'umi';
-import pageRoutes from './config/router.config';
 import { IConfig } from 'umi-types';
-import slash from 'slash2';
-import path, { resolve } from 'path';
+import pageRoutes from './config/router.config';
 
 const config: IConfig = {
   define: {
@@ -20,6 +19,9 @@ const config: IConfig = {
       'lodash',
     ],
   ],
+  alias: {
+    '@': resolve(__dirname, './src/'),
+  },
 };
 
 export default defineConfig(config);
