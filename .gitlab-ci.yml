@@ -1,0 +1,43 @@
+image: docker:1.13.1
+variables: #2
+  # DOCKER_DRIVER: overlay2
+  DOCKER_HOST: tcp://10.211.55.5:2375 # docker host我们要使用宿主机的docker，本地可不写
+  IMAGE: umi-project   #定义创建的镜像名称
+  NAME: demo  #定义容器名称
+
+before_script:
+  - echo "hello gitlab ci"
+stages:
+  - build
+  - deploy
+
+build_job: # 定义一个job
+  image: node:14.15.4
+
+  cache:
+    paths:
+      - ./node_modules/
+      - ./dist/
+
+  stage: build # 设置job所属的stage
+  tags:
+    - umi #对应gitlab-runner创建的tag
+  script: # 定义后面Runner来执行的具体脚本
+    - npm install --registry https://registry.npm.taobao.org
+    - npm run build
+
+deploy_job: # 定义一个job
+  image: docker:1.13.1
+  cache:
+    paths:
+      # - ./node_modules/
+      - ./dist/
+
+  stage: deploy # 设置job所属的stage
+  tags:
+    - umi #对应gitlab-runner创建的tag
+  script: # 定义后面Runner来执行的具体脚本
+    - docker rmi -f $IMAGE || true  #删除原来容器
+    - docker build -t $IMAGE .  #使用Dockerfile创建镜像
+    - docker rm -f $NAME || true  #删除原来容器
+    - docker run -d --name $NAME -p 80:80 $IMAGE   #创建容器映射容器端口80到宿主机80
